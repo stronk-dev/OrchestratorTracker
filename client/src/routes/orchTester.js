@@ -172,17 +172,16 @@ function hexToBytes(hex) {
 const discoverOrchestrator = async function (target) {
   if (!target) { return; }
   var client = new livepeerProto.Orchestrator(target, ssl_creds);
-  const addr = CONF_BROADCASTER;
   var receivedResults = false;
   var orchestratorInfo;
   const start = new Date().getTime();
   var elapsed = null;
   await client.GetOrchestrator({
-    address: hexToBytes(addr),
+    address: hexToBytes(CONF_BROADCASTER),
     sig: CONT_SIG
   }, function (err, res) {
     if (err) {
-      console.log("discovery err: ", err.details);
+      console.log("Discovery error: ", err.details);
       orchestratorInfo = err.details;
       elapsed = null;
     } else {
@@ -191,7 +190,7 @@ const discoverOrchestrator = async function (target) {
     }
     receivedResults = true;
   });
-  while (!receivedResults && new Date().getTime() - start < 5000) { await sleep(200); }
+  while (!receivedResults && new Date().getTime() - start < 4000) { await sleep(20); }
   return { discoveryResults: orchestratorInfo, elapsed };
 }
 
@@ -213,7 +212,7 @@ const pingOrchestrator = async function (target) {
     }
     receivedResults = true;
   });
-  while (!receivedResults && new Date().getTime() - start < 5000) { await sleep(200); }
+  while (!receivedResults && new Date().getTime() - start < 4000) { await sleep(20); }
   return { pingResults: pingPong, elapsed };
 }
 
