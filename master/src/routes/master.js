@@ -156,7 +156,7 @@ masterRouter.post("/collectStats", async (req, res) => {
       break;
     }
     if (!orchFound) {
-      currentDataList = [{ tag, data: [{ latency: thisPing, timestamp: now }] }];
+      currentDataList = [{ latency: thisPing, timestamp: now }];
       orchScores.push({ id: thisId, data: currentDataList });
     }
     await storage.setItem('orchScores', orchScores);
