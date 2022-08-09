@@ -242,7 +242,7 @@ const pingNextOrch = async function () {
   if (!currentPool.length) { refreshPool(); }
   let currentOrch = currentPool.splice(0, 1)[0];
   if (!currentOrch.id || !currentOrch.target) {
-    console.log("err: \n", currentOrch);
+    console.log("Skipping Orchestrator with malformed data: ", currentOrch);
     return;
   }
   await testOrchestrator(currentOrch.id, currentOrch.target);
