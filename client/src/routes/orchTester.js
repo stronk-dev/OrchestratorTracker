@@ -176,7 +176,7 @@ const discoverOrchestrator = async function (target) {
   var receivedResults = false;
   var orchestratorInfo;
   const start = new Date().getTime();
-  var elapsed;
+  var elapsed = null;
   await client.GetOrchestrator({
     address: hexToBytes(addr),
     sig: CONT_SIG
@@ -184,10 +184,11 @@ const discoverOrchestrator = async function (target) {
     if (err) {
       console.log("discovery err: ", err.details);
       orchestratorInfo = err.details;
+      elapsed = null;
     } else {
       orchestratorInfo = res;
+      elapsed = new Date().getTime() - start;
     }
-    elapsed = new Date().getTime() - start;
     receivedResults = true;
   });
   while (!receivedResults && new Date().getTime() - start < 5000) { await sleep(200); }
@@ -200,15 +201,16 @@ const pingOrchestrator = async function (target) {
   var receivedResults = false;
   var pingPong;
   const start = new Date().getTime();
-  var elapsed;
+  var elapsed = null;
   await client.Ping({ value: "koekjes" }, function (err, res) {
     if (err) {
       console.log("Ping err: ", err.details);
       pingPong = err.details;
+      elapsed = null;
     } else {
       pingPong = res;
+      elapsed = new Date().getTime() - start;
     }
-    elapsed = new Date().getTime() - start;
     receivedResults = true;
   });
   while (!receivedResults && new Date().getTime() - start < 5000) { await sleep(200); }
