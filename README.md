@@ -4,7 +4,7 @@ This program consists of three components:
     - TODO integration with email / telegram
     - TODO api to subscribe for notifications and cancel it
     - TODO read test stream scores
-    - TODO allow custom names (ENS, configure via frontend) to be used over orch address
+    - TODO allow custom names (configure via frontend, ENS done)
   - A client which pushes stats to master
     - Gets the list of active Orchestrators from the Livepeer subgraph
     - Does GetOrchestrator calls to all Orchestrators one by one

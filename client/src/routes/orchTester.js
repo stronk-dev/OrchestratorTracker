@@ -170,6 +170,7 @@ function hexToBytes(hex) {
 }
 
 const discoverOrchestrator = async function (target) {
+  if (!target) { return; }
   var client = new livepeerProto.Orchestrator(target, ssl_creds);
   const addr = CONF_BROADCASTER;
   var receivedResults = false;
@@ -194,6 +195,7 @@ const discoverOrchestrator = async function (target) {
 }
 
 const pingOrchestrator = async function (target) {
+  if (!target) { return; }
   var client = new livepeerProto.Orchestrator(target, ssl_creds);
   var receivedResults = false;
   var pingPong;
@@ -218,7 +220,7 @@ const testOrchestrator = async function (id, target) {
   target = target.replace(/^https?:\/\//, '');
   console.log("Target is  " + target);
   const { discoveryResults, elapsed } = await discoverOrchestrator(target);
-  if (discoveryResults && discoveryResults == "insufficient sender reserve"){
+  if (discoveryResults && discoveryResults == "insufficient sender reserve") {
     console.log('Ignoring ' + id + ' for stats due to insufficient sender reserve');
     return;
   }

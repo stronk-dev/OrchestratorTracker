@@ -3,7 +3,8 @@
 ```
   {
     MASTER_PORT: what port the master is listening on
-    PRESHARED_MASTER_KEY: clients must provide this value when uploading stats
+    PRESHARED_MASTER_KEY: clients must provide this value when uploading stats,
+    CONF_ENS_TIMEOUT: timeout in ms after which it will pull new ENS domain names from nFrame
   }
 ```
 ### Run production
@@ -16,7 +17,8 @@ example `config.js`:
 ```
 export const {
     MASTER_PORT = 42069,
-    PRESHARED_MASTER_KEY = "koekjes"
+    PRESHARED_MASTER_KEY = "koekjes",
+    CONF_ENS_TIMEOUT = 360000
 } = process.env;
 ```
 
@@ -31,7 +33,8 @@ example `config.js`:
 ```
 export const {
     MASTER_PORT = 42069,
-    PRESHARED_MASTER_KEY = "koekjes"
+    PRESHARED_MASTER_KEY = "koekjes",
+    CONF_ENS_TIMEOUT = 360000
 } = process.env;
 ```
 
