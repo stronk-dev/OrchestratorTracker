@@ -181,10 +181,12 @@ const discoverOrchestrator = async function (target) {
     sig: CONT_SIG
   }, function (err, res) {
     if (err) {
-      console.log("discovery err: ", err)
+      console.log("discovery err: ", err.details);
+      orchestratorInfo = err.details;
+    } else {
+      orchestratorInfo = res;
     }
     elapsed = new Date().getTime() - start;
-    orchestratorInfo = res;
     receivedResults = true;
   });
   while (!receivedResults && new Date().getTime() - start < 5000) { await sleep(200); }
@@ -199,10 +201,12 @@ const pingOrchestrator = async function (target) {
   var elapsed;
   await client.Ping({ value: "koekjes" }, function (err, res) {
     if (err) {
-      console.log("Ping err: ", err)
+      console.log("Ping err: ", err.details);
+      pingPong = err.details;
+    } else {
+      pingPong = res;
     }
     elapsed = new Date().getTime() - start;
-    pingPong = res;
     receivedResults = true;
   });
   while (!receivedResults && new Date().getTime() - start < 5000) { await sleep(200); }
@@ -214,6 +218,10 @@ const testOrchestrator = async function (id, target) {
   target = target.replace(/^https?:\/\//, '');
   console.log("Target is  " + target);
   const { discoveryResults, elapsed } = await discoverOrchestrator(target);
+  if (discoveryResults && discoveryResults == "insufficient sender reserve"){
+    console.log('Ignoring ' + id + ' for stats due to insufficient sender reserve');
+    return;
+  }
   await postStatistics(id, discoveryResults, elapsed);
 }
 
