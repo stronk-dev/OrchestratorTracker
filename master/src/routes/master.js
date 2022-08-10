@@ -100,8 +100,7 @@ Incoming stats parsing
 masterRouter.post("/collectStats", async (req, res) => {
   try {
     if (!isSynced) { console.log("waiting for sync"); res.end('busy'); return; }
-    const { id, discoveryResults,
-      responseTime, tag, key } = req.body;
+    const { id, discoveryResults, responseTime, tag, key } = req.body;
     if (!id || !tag || !key) {
       console.log("Received malformed data. Aborting stats update...");
       console.log(id, discoveryResults, responseTime, tag, key);
@@ -157,7 +156,7 @@ masterRouter.post("/collectStats", async (req, res) => {
     }
     if (!orchFound) {
       currentDataList = [{ latency: thisPing, timestamp: now }];
-      orchScores.push({ id: thisId, data: currentDataList });
+      orchScores.push({ id: thisId, data: [{ tag, data: currentDataList }] });
     }
     await storage.setItem('orchScores', orchScores);
     // Calc new scores
@@ -188,7 +187,9 @@ masterRouter.post("/collectStats", async (req, res) => {
       promAverageLatency.set({ region: tag, orchestrator: thisId }, pingsum / pingpoints);
     }
     if (uptime || downtime) {
-      const score = uptime / (uptime + downtime)
+      let score;
+      if (!uptime) { score = 0; }
+      else { score = uptime / (uptime + downtime); }
       promAUptimeScore.set({ region: tag, orchestrator: thisId }, score);
     }
     res.send(true);
@@ -219,7 +220,7 @@ masterRouter.get("/prometheus", async (req, res) => {
 masterRouter.get("/json", async (req, res) => {
   try {
     res.set('Content-Type', 'application/json');
-    res.end(orchScores);
+    res.end(JSON.stringify(orchScores));
   } catch (err) {
     res.status(400).send(err);
   }
