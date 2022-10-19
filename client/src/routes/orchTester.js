@@ -171,7 +171,7 @@ function hexToBytes(hex) {
 
 const discoverOrchestrator = async function (target) {
   if (!target) { return; }
-  var client = new livepeerProto.Orchestrator(target, ssl_creds);
+  var client = new livepeerProto.Orchestrator(target, ssl_creds, {"GRPC_ARG_DEFAULT_AUTHORITY": Math.random().toString(36).substr(2, 5)});
   var receivedResults = false;
   var orchestratorInfo;
   const start = new Date().getTime();
@@ -191,6 +191,7 @@ const discoverOrchestrator = async function (target) {
     receivedResults = true;
   });
   while (!receivedResults && new Date().getTime() - start < 4000) { await sleep(20); }
+  grpc.closeClient(client);
   return { discoveryResults: orchestratorInfo, elapsed };
 }
 
