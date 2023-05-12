@@ -52,7 +52,7 @@ let lastUpdated = 0;
 
 const updateEns = async function () {
   try {
-    const url = "https://nframe.nl/api/livepeer/getEnsDomains";
+    const url = "https://stronk.rocks/api/livepeer/getEnsDomains";
     console.log("Getting new ENS data from " + url);
 
     https.get(url, (res2) => {
