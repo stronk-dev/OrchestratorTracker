@@ -15,6 +15,12 @@ const promLatestLatency = new client.Gauge({
   labelNames: ['region', 'orchestrator']
 });
 register.registerMetric(promLatestLatency);
+const promLatestPPP = new client.Gauge({
+  name: 'orch_latest_ppp',
+  help: 'Latest price per pixel known for a given Orchestrator',
+  labelNames: ['region', 'orchestrator']
+});
+register.registerMetric(promLatestPPP);
 const promLatency = new client.Summary({
   name: 'orch_latency',
   help: 'Summary of latency stats',
@@ -121,6 +127,9 @@ masterRouter.post("/collectStats", async (req, res) => {
       }
       promLatestLatency.set({ region: tag, orchestrator: thisId }, responseTime);
       promLatency.observe({ region: tag }, responseTime);
+    }
+    if (discoveryResults && discoveryResults.price_info){
+      promLatestPPP.set({ region: tag, orchestrator: thisId }, discoveryResults.price_info.pricePerUnit / discoveryResults.price_info.pixelsPerUnit);
     }
     console.log('received data for ' + thisId + ' from ' + tag + ' (' + responseTime + " ms latency)");
     // Save data point
