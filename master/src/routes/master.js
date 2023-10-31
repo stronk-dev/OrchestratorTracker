@@ -182,13 +182,13 @@ masterRouter.post("/collectStats", async (req, res) => {
     let pingpoints = 0;
     for (const thisData of currentDataList) {
       // Count ping* vars
-      if (thisData.latency) {
+      if (thisData.latency && thisData.latency != null) {
         pingsum += thisData.latency;
         pingpoints += 1;
       }
       // Only count *time vars if we have timestamps
       if (prevtime && thisData.timestamp) {
-        if (thisData.latency) {
+        if (thisData.latency && thisData.latency != null && thisData.latency < 1000) {
           uptime += thisData.timestamp - prevtime;
         } else {
           downtime += thisData.timestamp - prevtime;
