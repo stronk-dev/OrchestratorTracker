@@ -120,7 +120,7 @@ masterRouter.post("/collectStats", async (req, res) => {
     }
     const latitude = null;
     const longitude = null;
-    if (lookupResults.ll){
+    if (lookupResults && lookupResults.ll){
       latitude = lookupResults.ll[0];
       longitude = lookupResults.ll[1];
     }
@@ -131,11 +131,11 @@ masterRouter.post("/collectStats", async (req, res) => {
         if (thisEns.address != thisId) { continue; }
         thisId = thisEns.domain;
       }
-      promLatestLatency.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, responseTime);
+      promLatestLatency.set({ region: tag, orchestrator: thisId, latitude: latitude, longitude: longitude }, responseTime);
       promLatency.observe({ region: tag }, responseTime);
     }
     if (discoveryResults && discoveryResults.price_info){
-      promLatestPPP.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, discoveryResults.price_info.pricePerUnit / discoveryResults.price_info.pixelsPerUnit);
+      promLatestPPP.set({ region: tag, orchestrator: thisId, latitude: latitude, longitude: longitude }, discoveryResults.price_info.pricePerUnit / discoveryResults.price_info.pixelsPerUnit);
     }
     console.log('received data for ' + thisId + ' from ' + tag + ' (' + responseTime + " ms latency)");
     // Save data point
@@ -197,13 +197,13 @@ masterRouter.post("/collectStats", async (req, res) => {
       prevtime = thisData.timestamp;
     }
     if (pingpoints) {
-      promAverageLatency.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, pingsum / pingpoints);
+      promAverageLatency.set({ region: tag, orchestrator: thisId, latitude: latitude, longitude: longitude }, pingsum / pingpoints);
     }
     if (uptime || downtime) {
       let score;
       if (!uptime) { score = 0; }
       else { score = uptime / (uptime + downtime); }
-      promAUptimeScore.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, score);
+      promAUptimeScore.set({ region: tag, orchestrator: thisId, latitude: latitude, longitude: longitude }, score);
     }
     res.send(true);
   } catch (err) {
