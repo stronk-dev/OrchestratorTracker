@@ -12,13 +12,13 @@ collectDefaultMetrics({ timeout: 3000 });
 const promLatestLatency = new client.Gauge({
   name: 'orch_latest_latency',
   help: 'Latest latency known for a given Orchestrator',
-  labelNames: ['region', 'orchestrator']
+  labelNames: ['region', 'orchestrator', 'latitude', 'longitude']
 });
 register.registerMetric(promLatestLatency);
 const promLatestPPP = new client.Gauge({
   name: 'orch_latest_ppp',
   help: 'Latest price per pixel known for a given Orchestrator',
-  labelNames: ['region', 'orchestrator']
+  labelNames: ['region', 'orchestrator', 'latitude', 'longitude']
 });
 register.registerMetric(promLatestPPP);
 const promLatency = new client.Summary({
@@ -31,13 +31,13 @@ register.registerMetric(promLatency);
 const promAverageLatency = new client.Gauge({
   name: 'orch_average_latency',
   help: 'Average latency for a given Orchestrator',
-  labelNames: ['region', 'orchestrator']
+  labelNames: ['region', 'orchestrator', 'latitude', 'longitude']
 });
 register.registerMetric(promAverageLatency);
 const promAUptimeScore = new client.Gauge({
   name: 'orch_uptime_score',
   help: 'Uptime score for a given orchestrator',
-  labelNames: ['region', 'orchestrator']
+  labelNames: ['region', 'orchestrator', 'latitude', 'longitude']
 });
 register.registerMetric(promAUptimeScore);
 
@@ -106,10 +106,10 @@ Incoming stats parsing
 masterRouter.post("/collectStats", async (req, res) => {
   try {
     if (!isSynced) { console.log("waiting for sync"); res.end('busy'); return; }
-    const { id, discoveryResults, responseTime, tag, key } = req.body;
+    const { id, discoveryResults, responseTime, lookupResults, tag, key } = req.body;
     if (!id || !tag || !key) {
       console.log("Received malformed data. Aborting stats update...");
-      console.log(id, discoveryResults, responseTime, tag, key);
+      console.log(id, discoveryResults, responseTime, lookupResults, tag, key);
       res.send(false);
       return;
     }
@@ -118,6 +118,12 @@ masterRouter.post("/collectStats", async (req, res) => {
       res.send(false);
       return;
     }
+    const latitude = null;
+    const longitude = null;
+    if (lookupResults.ll){
+      latitude = lookupResults.ll[0];
+      longitude = lookupResults.ll[1];
+    }
     let thisId = id;
     if (responseTime) {
       for (const thisEns of ensData) {
@@ -125,11 +131,11 @@ masterRouter.post("/collectStats", async (req, res) => {
         if (thisEns.address != thisId) { continue; }
         thisId = thisEns.domain;
       }
-      promLatestLatency.set({ region: tag, orchestrator: thisId }, responseTime);
+      promLatestLatency.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, responseTime);
       promLatency.observe({ region: tag }, responseTime);
     }
     if (discoveryResults && discoveryResults.price_info){
-      promLatestPPP.set({ region: tag, orchestrator: thisId }, discoveryResults.price_info.pricePerUnit / discoveryResults.price_info.pixelsPerUnit);
+      promLatestPPP.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, discoveryResults.price_info.pricePerUnit / discoveryResults.price_info.pixelsPerUnit);
     }
     console.log('received data for ' + thisId + ' from ' + tag + ' (' + responseTime + " ms latency)");
     // Save data point
@@ -179,8 +185,6 @@ masterRouter.post("/collectStats", async (req, res) => {
       if (thisData.latency) {
         pingsum += thisData.latency;
         pingpoints += 1;
-        promLatestLatency.set({ region: tag, orchestrator: thisId }, thisData.latency);
-        promLatency.observe({ region: tag }, thisData.latency);
       }
       // Only count *time vars if we have timestamps
       if (prevtime && thisData.timestamp) {
@@ -193,13 +197,13 @@ masterRouter.post("/collectStats", async (req, res) => {
       prevtime = thisData.timestamp;
     }
     if (pingpoints) {
-      promAverageLatency.set({ region: tag, orchestrator: thisId }, pingsum / pingpoints);
+      promAverageLatency.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, pingsum / pingpoints);
     }
     if (uptime || downtime) {
       let score;
       if (!uptime) { score = 0; }
       else { score = uptime / (uptime + downtime); }
-      promAUptimeScore.set({ region: tag, orchestrator: thisId }, score);
+      promAUptimeScore.set({ region: tag, orchestrator: thisId, latitude: longitude, longitude: longitude }, score);
     }
     res.send(true);
   } catch (err) {

@@ -18,6 +18,7 @@
     "@grpc/proto-loader": "^0.7.0",
     "esm": "^3.2.20",
     "express": "^4.17.1",
+    "geoip-lite": "^1.4.8",
     "graphql": "^16.5.0",
     "graphql-request": "^4.3.0",
     "npm": "^8.5.2",
