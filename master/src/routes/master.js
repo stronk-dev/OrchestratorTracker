@@ -118,11 +118,11 @@ masterRouter.post("/collectStats", async (req, res) => {
       res.send(false);
       return;
     }
-    const latitude = null;
-    const longitude = null;
-    if (lookupResults && lookupResults.ll){
-      latitude = lookupResults.ll[0];
-      longitude = lookupResults.ll[1];
+    let latitude = null;
+    let longitude = null;
+    if (lookupResults && lookupResults.geoLookup.ll){
+      latitude = lookupResults.geoLookup.ll[0];
+      longitude = lookupResults.geoLookup.ll[1];
     }
     let thisId = id;
     if (responseTime) {
