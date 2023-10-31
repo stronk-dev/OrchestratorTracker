@@ -120,7 +120,7 @@ masterRouter.post("/collectStats", async (req, res) => {
     }
     let latitude = null;
     let longitude = null;
-    if (lookupResults && lookupResults.geoLookup.ll){
+    if (lookupResults && lookupResults.geoLookup && lookupResults.geoLookup.ll){
       latitude = lookupResults.geoLookup.ll[0];
       longitude = lookupResults.geoLookup.ll[1];
     }
