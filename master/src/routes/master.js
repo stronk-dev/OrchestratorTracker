@@ -207,7 +207,7 @@ masterRouter.post("/collectStats", async (req, res) => {
     }
     res.send(true);
   } catch (err) {
-    console.log(err);
+    console.log(err, req.body);
     res.status(400).send(err);
   }
 });
