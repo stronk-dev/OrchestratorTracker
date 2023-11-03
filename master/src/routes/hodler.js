@@ -297,7 +297,12 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       !newInstance.probedFrom[key].lastTime ||
       now - newInstance.probedFrom[key].lastTime > CONF_KEY_EXPIRY
     ) {
-      console.log("Removing expired key " + key + " from the probed-from cache for orch " + id);
+      console.log(
+        "Removing expired key " +
+          key +
+          " from the probed-from cache for orch " +
+          id
+      );
       delete newInstance.probedFrom[key];
     }
   });
@@ -307,7 +312,9 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       !newInstance.regions[key].lastTime ||
       now - newInstance.regions[key].lastTime > CONF_KEY_EXPIRY
     ) {
-      console.log("Removing expired key " + key + " from the regions cache for orch " + id);
+      console.log(
+        "Removing expired key " + key + " from the regions cache for orch " + id
+      );
       delete newInstance.regions[key];
     }
   });
@@ -317,7 +324,12 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       !newInstance.livepeer_regions[key].lastTime ||
       now - newInstance.livepeer_regions[key].lastTime > CONF_KEY_EXPIRY
     ) {
-      console.log("Removing expired key " + key + " from the livepeer regions cache for orch " + id);
+      console.log(
+        "Removing expired key " +
+          key +
+          " from the livepeer regions cache for orch " +
+          id
+      );
       delete newInstance.livepeer_regions[key];
     }
   });
@@ -485,6 +497,12 @@ const updateScore = async function (address) {
           },
           newSR
         );
+        orchCache[address.toLowerCase()].leaderboardResults[
+          instance.region
+        ].latestRTR = newRTR;
+        orchCache[address.toLowerCase()].leaderboardResults[
+          instance.region
+        ].latestSR = newSR;
         hasEdited = true;
       }
     }
@@ -517,6 +535,49 @@ const recoverStorage = async function () {
   storedOrchs = await storage.getItem("orchCache");
   if (storedOrchs) {
     orchCache = storedOrchs;
+  }
+
+  // Re-init from storage
+  for (const [id, obj] of Object.entries(orchCache)) {
+    const thisName = obj.name;
+
+    // Latest leaderboard results observed
+    if (obj.leaderboardResults) {
+      for (const [region, res] of Object.entries(obj.leaderboardResults)) {
+        // Skip the lastTime accessor - only use last observed regional stats
+        if (!res.latestRTR || res.latestSR) {
+          continue;
+        }
+        console.log(
+          "Re-init leaderboard scores for orch=" +
+            id +
+            ", RTR=" +
+            res.latestRTR +
+            " and success rate of " +
+            res.latestSR * 100 +
+            "%, livepeer region " +
+            region
+        );
+        promLatestRTR.set(
+          {
+            livepeer_region: region,
+            orchestrator: thisName,
+            latitude: latitude,
+            longitude: longitude,
+          },
+          res.latestRTR
+        );
+        promLatestSuccessRate.set(
+          {
+            livepeer_region: region,
+            orchestrator: thisName,
+            latitude: latitude,
+            longitude: longitude,
+          },
+          res.latestSR
+        );
+      }
+    }
   }
   isSynced = true;
 };
