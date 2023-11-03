@@ -93,44 +93,43 @@ ENS
 */
 
 const getEnsDomain = async function (addr) {
-  const now = new Date().getTime();
-  const cached = ensDomainCache[addr];
-  if (cached && now - cached.timestamp < CONF_TIMEOUT_ENS_DOMAIN) {
-    return cached.domain ? cached.domain : cached.address
-  }
-  // Refresh cause not cached or stale
-  let ensDomain;
   try {
-    ensDomain = await l1provider.lookupAddress(addr.toLowerCase());
+    const now = new Date().getTime();
+    const cached = ensDomainCache[addr];
+    if (cached && now - cached.timestamp < CONF_TIMEOUT_ENS_DOMAIN) {
+      return cached.domain ? cached.domain : cached.address;
+    }
+    // Refresh cause not cached or stale
+    const ensDomain = await l1provider.lookupAddress(addr.toLowerCase());
+    let ensObj;
+    if (!ensDomain) {
+      ensObj = {
+        domain: null,
+        address: addr,
+        timestamp: now,
+      };
+    } else {
+      ensObj = {
+        domain: ensDomain,
+        address: addr,
+        timestamp: now,
+      };
+    }
+    console.log(
+      "Updated ENS domain " +
+        ensObj.domain +
+        " owned by " +
+        ensObj.address +
+        " @ " +
+        ensObj.timestamp
+    );
+    ensDomainCache[addr] = ensObj;
+    return ensObj.domain ? ensObj.domain : ensObj.address;
   } catch (err) {
     console.log("Error looking up ENS info, retrying...");
     await sleep(50);
     return null;
   }
-  let ensObj;
-  if (!ensDomain) {
-    ensObj = {
-      domain: null,
-      address: addr,
-      timestamp: now,
-    };
-  } else {
-    ensObj = {
-      domain: ensDomain,
-      address: addr,
-      timestamp: now,
-    };
-  }
-  console.log(
-    "Updated ENS domain " +
-      ensObj.domain +
-      " owned by " +
-      ensObj.address +
-      " @ " +
-      ensObj.timestamp
-  );
-  ensDomainCache[addr] = ensObj;
-  return ensObj.domain ? ensObj.domain : ensObj.address
 };
 
 /*
@@ -201,7 +200,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       instances: {},
       leaderboardResults: { lastTime: now },
     };
-  }else{
+  } else {
     newObj.name = ensDomain;
   }
   // Find region entry or init it
