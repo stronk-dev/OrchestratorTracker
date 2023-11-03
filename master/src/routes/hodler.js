@@ -1,6 +1,6 @@
 const express = require("express");
 const client = require("prom-client");
-const { JsonRpcProvider } = require("ethers");
+const { ethers } = require("ethers");
 const {
   CONF_API_L1_HTTP,
   CONF_API_L1_KEY,
@@ -17,7 +17,7 @@ const {
 
 */
 
-const l1provider = new JsonRpcProvider(CONF_API_L1_HTTP + CONF_API_L1_KEY);
+const l1provider = new ethers.JsonRpcProvider(CONF_API_L1_HTTP + CONF_API_L1_KEY);
 const masterRouter = express.Router();
 const register = new client.Registry();
 
@@ -100,7 +100,8 @@ const getEnsDomain = async function (addr) {
       return cached.domain ? cached.domain : cached.address;
     }
     // Refresh cause not cached or stale
-    const ensDomain = await l1provider.lookupAddress(addr.toLowerCase());
+    const address = ethers.getAddress(addr);
+    const ensDomain = await l1provider.lookupAddress(address);
     let ensObj;
     if (!ensDomain) {
       ensObj = {
@@ -126,6 +127,7 @@ const getEnsDomain = async function (addr) {
     ensDomainCache[addr] = ensObj;
     return ensObj.domain ? ensObj.domain : ensObj.address;
   } catch (err) {
+    console.log(err);
     console.log("Error looking up ENS info, retrying...");
     await sleep(50);
     return null;
@@ -416,7 +418,7 @@ const updateScore = async function (address) {
         const newSR = instance.round_trip_time / instance.seg_duration;
         let latitude = null;
         let longitude = null;
-        for (const instance of orchCache[address].instances) {
+        for (const [resolvedTarget, instance] of orchCache[address].instances) {
           if (instance.livepeer_regions[region]) {
             latitude = instance.livepeer_regions[region].latitude;
             longitude = instance.livepeer_regions[region].longitude;
