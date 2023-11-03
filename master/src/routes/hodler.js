@@ -1,6 +1,7 @@
 const express = require("express");
 const client = require("prom-client");
 const { ethers } = require("ethers");
+const storage = require("node-persist");
 const {
   CONF_API_L1_HTTP,
   CONF_API_L1_KEY,
@@ -17,7 +18,9 @@ const {
 
 */
 
-const l1provider = new ethers.JsonRpcProvider(CONF_API_L1_HTTP + CONF_API_L1_KEY);
+const l1provider = new ethers.JsonRpcProvider(
+  CONF_API_L1_HTTP + CONF_API_L1_KEY
+);
 const masterRouter = express.Router();
 const register = new client.Registry();
 
@@ -85,6 +88,7 @@ function sleep(ms) {
 let ensDomainCache = {};
 let orchCache = {};
 let lastLeaderboardCheck = 0;
+let isSynced = false;
 
 /*
 
@@ -105,7 +109,7 @@ const getEnsDomain = async function (addr) {
     let ensObj;
     if (!ensDomain) {
       let domain = null;
-      if (cached){
+      if (cached) {
         domain = cached.domain;
       }
       ensObj = {
@@ -129,6 +133,7 @@ const getEnsDomain = async function (addr) {
         ensObj.timestamp
     );
     ensDomainCache[addr] = ensObj;
+    await storage.setItem("ensDomainCache", ensDomainCache);
     return ensObj.domain ? ensObj.domain : ensObj.address;
   } catch (err) {
     console.log(err);
@@ -330,6 +335,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   newObj.instances[obj.resolv.resolvedTarget] = newInstance;
   newObj.regionalStats[tag] = newRegion;
   orchCache[id.toLowerCase()] = newObj;
+  await storage.setItem("orchCache", orchCache);
 
   // Update prometheus stats
   updatePrometheus(tag, id, obj.resolv.resolvedTarget, newObj);
@@ -357,6 +363,10 @@ Public endpoints
 
 // Mutate state with new stats
 masterRouter.post("/collectStats", async (req, res) => {
+  if (!isSynced) {
+    res.send("busy");
+    return;
+  }
   try {
     const { batchResults, tag, key, region, livepeer_regions } = req.body;
     if (!batchResults || !tag || !key || !region || !livepeer_regions) {
@@ -422,7 +432,10 @@ const updateScore = async function (address) {
         const newSR = instance.round_trip_time / instance.seg_duration;
         let latitude = null;
         let longitude = null;
-        for (const [resolvedTarget, instance] of orchCache[address.toLowerCase()].instances) {
+        console.log(address, orchCache[address.toLowerCase()]);
+        for (const [resolvedTarget, instance] of orchCache[
+          address.toLowerCase()
+        ].instances) {
           if (instance.livepeer_regions[region]) {
             latitude = instance.livepeer_regions[region].latitude;
             longitude = instance.livepeer_regions[region].longitude;
@@ -459,7 +472,8 @@ const updateScore = async function (address) {
     }
   }
   if (hasEdited) {
-    orchCache[address.toLowerCase()].leaderboardResults.lastTime = new Date().getTime();
+    orchCache[address.toLowerCase()].leaderboardResults.lastTime =
+      new Date().getTime();
   }
 };
 
@@ -468,6 +482,27 @@ const updateOrchScores = async function () {
     await updateScore(id);
   }
 };
+
+const recoverStorage = async function () {
+  await storage.init({
+    stringify: JSON.stringify,
+    parse: JSON.parse,
+    encoding: "utf8",
+    logging: false,
+    ttl: false,
+    forgiveParseErrors: false,
+  });
+  storedDomains = await storage.getItem("ensDomainCache");
+  if (storedDomains) {
+    ensDomainCache = storedDomains;
+  }
+  storedOrchs = await storage.getItem("orchCache");
+  if (storedOrchs) {
+    orchCache = storedOrchs;
+  }
+  isSynced = true;
+};
+recoverStorage();
 
 const runTests = async function () {
   try {

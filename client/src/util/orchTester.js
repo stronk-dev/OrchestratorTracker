@@ -116,7 +116,7 @@ const batchPostStats = async function () {
       "Content-Length": postData.length,
     },
   };
-  console.log("Uploading stats of " + postData.length + "B");
+  console.log("Uploading " + postData.length + " B of stats");
   var req;
   if (CONF_MASTER_DOMAIN == "127.0.0.1" || CONF_MASTER_DOMAIN == "localhost") {
     req = http.request(options, (res) => {
