@@ -149,7 +149,7 @@ const getEnsDomain = async function (addr) {
 
 */
 
-const updatePrometheus = async function (tag, id, instance, orchInfo) {
+const updatePrometheus = async function (tag, instance, orchInfo) {
   const thisInstance = orchInfo.instances[instance];
   const regionInfo = orchInfo.regionalStats[tag];
   if (regionInfo.latestDiscoveryTime) {
@@ -297,6 +297,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       !newInstance.probedFrom[key].lastTime ||
       now - newInstance.probedFrom[key].lastTime > CONF_KEY_EXPIRY
     ) {
+      console.log("Removing expired key " + key + " from the probed-from cache for orch " + id);
       delete newInstance.probedFrom[key];
     }
   });
@@ -306,6 +307,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       !newInstance.regions[key].lastTime ||
       now - newInstance.regions[key].lastTime > CONF_KEY_EXPIRY
     ) {
+      console.log("Removing expired key " + key + " from the regions cache for orch " + id);
       delete newInstance.regions[key];
     }
   });
@@ -315,6 +317,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       !newInstance.livepeer_regions[key].lastTime ||
       now - newInstance.livepeer_regions[key].lastTime > CONF_KEY_EXPIRY
     ) {
+      console.log("Removing expired key " + key + " from the livepeer regions cache for orch " + id);
       delete newInstance.livepeer_regions[key];
     }
   });
@@ -353,7 +356,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   await storage.setItem("orchCache", orchCache);
 
   // Update prometheus stats
-  updatePrometheus(tag, id, obj.resolv.resolvedTarget, newObj);
+  updatePrometheus(tag, obj.resolv.resolvedTarget, newObj);
   console.log("Handled results for " + id + " from prober " + tag);
 };
 
