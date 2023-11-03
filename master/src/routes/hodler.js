@@ -417,6 +417,7 @@ Main Loop
 
 const updateScore = async function (address) {
   console.log("Checking for new scores for " + address);
+  const thisInstances = orchCache[address.toLowerCase()].instances;
   const lastTime = orchCache[address.toLowerCase()].leaderboardResults.lastTime;
 
   let url =
@@ -432,10 +433,7 @@ const updateScore = async function (address) {
         const newSR = instance.round_trip_time / instance.seg_duration;
         let latitude = null;
         let longitude = null;
-        console.log(address, orchCache[address.toLowerCase()]);
-        for (const [resolvedTarget, instance] of orchCache[
-          address.toLowerCase()
-        ].instances) {
+        for (const [resolvedTarget, instance] of Object.entries(thisInstances)) {
           if (instance.livepeer_regions[region]) {
             latitude = instance.livepeer_regions[region].latitude;
             longitude = instance.livepeer_regions[region].longitude;
