@@ -554,12 +554,13 @@ const recoverStorage = async function () {
   // Re-init from storage
   for (const [id, obj] of Object.entries(orchCache)) {
     const thisName = obj.name;
+    const thisInstances = obj.instances;
 
     // Latest leaderboard results observed
     if (obj.leaderboardResults) {
       for (const [region, res] of Object.entries(obj.leaderboardResults)) {
         // Skip the lastTime accessor - only use last observed regional stats
-        if (!res.latestRTR || res.latestSR) {
+        if (res.latestRTR == null || res.latestSR == null) {
           continue;
         }
         console.log(
@@ -572,6 +573,16 @@ const recoverStorage = async function () {
             "%, livepeer region " +
             region
         );
+        let latitude = null;
+        let longitude = null;
+        for (const [resolvedTarget, instance] of Object.entries(
+          thisInstances
+        )) {
+          if (instance.livepeer_regions[region]) {
+            latitude = instance.latitude;
+            longitude = instance.longitude;
+          }
+        }
         promLatestRTR.set(
           {
             livepeer_region: region,
