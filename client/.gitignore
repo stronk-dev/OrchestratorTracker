@@ -1,4 +1,3 @@
 /node_modules
-/src/config.js
-genSig.js
+src/config.js
 package-lock.json

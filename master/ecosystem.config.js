@@ -1,8 +1,8 @@
 module.exports = {
    apps: [
       {
-         name: "hodler",
-         script: "./src/hodler.js",
+         name: "master-hodler",
+         script: "./src/master.js",
          cwd: "/orchTest/master",
          env_production: {
             NODE_ENV: "production"

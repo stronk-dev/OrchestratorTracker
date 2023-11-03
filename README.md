@@ -1,11 +1,11 @@
 This program consists of three components:
   - A master which consolidates orchestrator statistics from various clients
-    - Converts raw results of grpc calls into prometheus data points
+    - Publishes GetOrchestrator responses and discovery time
+    - Publishes orchestrator price info
+    - Observes Livepeer Inc performance leaderboards results to Prometheus
     - TODO integration with email / telegram
     - TODO api to subscribe for notifications and cancel it
-    - TODO read test stream scores
-    - TODO allow custom names (configure via frontend, ENS done)
   - A client which pushes stats to master
     - Gets the list of active Orchestrators from the Livepeer subgraph
-    - Does GetOrchestrator calls to all Orchestrators one by one
-  - A frontend where users can (un)subscribe to notifications
+    - Test each of them and upload results
+  - TODO A frontend where users can (un)subscribe to notifications

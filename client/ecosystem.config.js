@@ -1,8 +1,8 @@
 module.exports = {
    apps: [
       {
-         name: "orchProber",
-         script: "./src/orchProber.js",
+         name: "client-orchestrator-prober",
+         script: "./src/client.js",
          cwd: "/orchTest/client",
          env_production: {
             NODE_ENV: "production"

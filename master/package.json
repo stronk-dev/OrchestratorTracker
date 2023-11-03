@@ -1,22 +1,22 @@
 {
-  "name": "hodler",
-  "version": "0.0.1",
+  "name": "master-hodler",
+  "version": "0.1.0",
   "description": "",
-  "main": "./src/hodler.js",
-  "module": "./src/hodler.js",
+  "main": "./src/master.js",
+  "type": "module",
+  "module": "./src/master.js",
   "scripts": {
     "prod": "NODE_ENV=production pm2 start ecosystem.config.js",
-    "start": "NODE_ENV=production node ./src/hodler.js",
-    "dev": "NODE_ENV=development nodemon ./src/hodler.js",
-    "local": "NODE_ENV=local nodemon ./src/hodler.js"
+    "start": "NODE_ENV=production node ./src/master.js",
+    "dev": "NODE_ENV=development nodemon ./src/master.js",
+    "local": "NODE_ENV=local nodemon ./src/master.js"
   },
   "keywords": [],
   "author": "Marco van Dijk",
   "license": "WTFPL",
   "dependencies": {
-    "esm": "^3.2.20",
+    "ethers": "^6.8.1",
     "express": "^4.17.1",
-    "node-persist": "^3.1.0",
     "npm": "^8.5.2",
     "prom-client": "^14.0.1"
   },
