@@ -134,7 +134,18 @@ const getEnsDomain = async function (addr) {
     );
     ensDomainCache[addr] = ensObj;
     await storage.setItem("ensDomainCache", ensDomainCache);
-    return ensObj.domain ? ensObj.domain : ensObj.address;
+    if (ensObj.domain) {
+      // Update domain name
+      return ensObj.domain;
+    } else {
+      if (cached.domain) {
+        // Reuse last cached domain
+        return cached.domain;
+      } else {
+        // Return ETH addr
+        return ensObj.address;
+      }
+    }
   } catch (err) {
     console.log(err);
     console.log("Error looking up ENS info, retrying...");
