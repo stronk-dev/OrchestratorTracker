@@ -369,7 +369,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
 
   // Update prometheus stats
   updatePrometheus(tag, obj.resolv.resolvedTarget, newObj);
-  console.log("Handled results for " + id + " from prober " + tag);
+  console.log("Handled results for " + newObj.name + " from prober " + tag);
 };
 
 const updateCache = async function (
