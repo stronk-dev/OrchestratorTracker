@@ -96,7 +96,7 @@ const getEnsDomain = async function (addr) {
   const now = new Date().getTime();
   const cached = ensDomainCache[addr];
   if (cached && now - cached.timestamp < CONF_TIMEOUT_ENS_DOMAIN) {
-    return cached.domain || cached.address;
+    return cached.domain ? cached.domain : cached.address
   }
   // Refresh cause not cached or stale
   let ensDomain;
@@ -130,7 +130,7 @@ const getEnsDomain = async function (addr) {
       ensObj.timestamp
   );
   ensDomainCache[addr] = ensObj;
-  return ensObj.domain || ensObj.address;
+  return ensObj.domain ? ensObj.domain : ensObj.address
 };
 
 /*
@@ -192,16 +192,17 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   while (!ensDomain) {
     ensDomain = await getEnsDomain(id);
   }
-  obj.name = ensDomain;
   // Retrieve entry to update or init it
   let newObj = orchCache[id];
   if (!newObj) {
     newObj = {
-      name: "",
+      name: obj.name,
       regionalStats: {},
       instances: {},
       leaderboardResults: { lastTime: now },
     };
+  }else{
+    newObj.name = ensDomain;
   }
   // Find region entry or init it
   let newRegion = newObj.regionalStats[tag];
