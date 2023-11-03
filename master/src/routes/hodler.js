@@ -104,8 +104,12 @@ const getEnsDomain = async function (addr) {
     const ensDomain = await l1provider.lookupAddress(address);
     let ensObj;
     if (!ensDomain) {
+      let domain = null;
+      if (cached){
+        domain = cached.domain;
+      }
       ensObj = {
-        domain: null,
+        domain: domain,
         address: addr,
         timestamp: now,
       };
@@ -129,7 +133,7 @@ const getEnsDomain = async function (addr) {
   } catch (err) {
     console.log(err);
     console.log("Error looking up ENS info, retrying...");
-    await sleep(50);
+    await sleep(200);
     return null;
   }
 };
