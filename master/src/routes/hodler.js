@@ -435,8 +435,8 @@ const updateScore = async function (address) {
         let longitude = null;
         for (const [resolvedTarget, instance] of Object.entries(thisInstances)) {
           if (instance.livepeer_regions[region]) {
-            latitude = instance.livepeer_regions[region].latitude;
-            longitude = instance.livepeer_regions[region].longitude;
+            latitude = instance.latitude;
+            longitude = instance.longitude;
           }
         }
         console.log(
