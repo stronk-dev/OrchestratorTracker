@@ -497,6 +497,12 @@ const updateScore = async function (address) {
           },
           newSR
         );
+        if (
+          !orchCache[address.toLowerCase()].leaderboardResults[instance.region]
+        ) {
+          orchCache[address.toLowerCase()].leaderboardResults[instance.region] =
+            {};
+        }
         orchCache[address.toLowerCase()].leaderboardResults[
           instance.region
         ].latestRTR = newRTR;
