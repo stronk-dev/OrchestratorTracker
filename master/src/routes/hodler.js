@@ -291,21 +291,33 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   }
 
   // Remove expired stuff
-  for (const [id, obj] of Object.entries(newInstance.probedFrom)) {
-    if (now - obj.lastTime > CONF_KEY_EXPIRY) {
-      newInstance.probedFrom[id] = null;
+  Object.keys(newInstance.probedFrom).forEach((key) => {
+    if (
+      !newInstance.probedFrom[key] ||
+      !newInstance.probedFrom[key].lastTime ||
+      now - newInstance.probedFrom[key].lastTime > CONF_KEY_EXPIRY
+    ) {
+      delete newInstance.probedFrom[key];
     }
-  }
-  for (const [id, obj] of Object.entries(newInstance.regions)) {
-    if (now - obj.lastTime > CONF_KEY_EXPIRY) {
-      newInstance.regions[id] = null;
+  });
+  Object.keys(newInstance.regions).forEach((key) => {
+    if (
+      !newInstance.regions[key] ||
+      !newInstance.regions[key].lastTime ||
+      now - newInstance.regions[key].lastTime > CONF_KEY_EXPIRY
+    ) {
+      delete newInstance.regions[key];
     }
-  }
-  for (const [id, obj] of Object.entries(newInstance.livepeer_regions)) {
-    if (now - obj.lastTime > CONF_KEY_EXPIRY) {
-      newInstance.livepeer_regions[id] = null;
+  });
+  Object.keys(newInstance.livepeer_regions).forEach((key) => {
+    if (
+      !newInstance.livepeer_regions[key] ||
+      !newInstance.livepeer_regions[key].lastTime ||
+      now - newInstance.livepeer_regions[key].lastTime > CONF_KEY_EXPIRY
+    ) {
+      delete newInstance.livepeer_regions[key];
     }
-  }
+  });
 
   // Set last times for instance info
   newInstance.probedFrom[tag] = {
@@ -436,7 +448,9 @@ const updateScore = async function (address) {
         const newRTR = instance.round_trip_time / instance.seg_duration;
         let latitude = null;
         let longitude = null;
-        for (const [resolvedTarget, instance] of Object.entries(thisInstances)) {
+        for (const [resolvedTarget, instance] of Object.entries(
+          thisInstances
+        )) {
           if (instance.livepeer_regions[region]) {
             latitude = instance.latitude;
             longitude = instance.longitude;
