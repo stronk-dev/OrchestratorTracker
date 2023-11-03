@@ -412,7 +412,7 @@ const updateScore = async function (address) {
   let hasEdited = false;
   for (const [region, results] of Object.entries(json)) {
     for (const instance of results) {
-      if (instance.timestamp > lastTime) {
+      if (instance.timestamp * 1000 > lastTime) {
         const newRTR = instance.success_rate;
         const newSR = instance.round_trip_time / instance.seg_duration;
         let latitude = null;
