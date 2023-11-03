@@ -206,7 +206,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   let newObj = orchCache[id.toLowerCase()];
   if (!newObj) {
     newObj = {
-      name: obj.name,
+      name: ensDomain,
       regionalStats: {},
       instances: {},
       leaderboardResults: { lastTime: now },
@@ -357,9 +357,6 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
     newInstance.latitude = obj.resolv.geoLookup.latitude;
     newInstance.longitude = obj.resolv.geoLookup.longitude;
   }
-
-  // Update name
-  newObj.name = obj.name;
 
   // Finished updating
   newObj.instances[obj.resolv.resolvedTarget] = newInstance;
