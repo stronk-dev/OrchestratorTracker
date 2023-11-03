@@ -236,6 +236,9 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       now - newRegion.measurements[newRegion.measurements.length - 1].timestamp;
   }
   newRegion.measurements.push(measurement);
+  if (newRegion.measurements.length > 60) {
+    newRegion.measurements = newRegion.measurements.slice(1);
+  }
 
   // Recalc average && uptime
   let uptime = 0;
