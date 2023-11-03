@@ -429,8 +429,8 @@ const updateScore = async function (address) {
   for (const [region, results] of Object.entries(json)) {
     for (const instance of results) {
       if (instance.timestamp * 1000 > lastTime) {
-        const newRTR = instance.success_rate;
-        const newSR = instance.round_trip_time / instance.seg_duration;
+        const newSR = instance.success_rate;
+        const newRTR = instance.round_trip_time / instance.seg_duration;
         let latitude = null;
         let longitude = null;
         for (const [resolvedTarget, instance] of Object.entries(thisInstances)) {
