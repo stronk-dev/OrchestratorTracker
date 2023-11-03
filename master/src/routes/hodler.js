@@ -198,7 +198,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
     ensDomain = await getEnsDomain(id);
   }
   // Retrieve entry to update or init it
-  let newObj = orchCache[id];
+  let newObj = orchCache[id.toLowerCase()];
   if (!newObj) {
     newObj = {
       name: obj.name,
@@ -329,7 +329,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   // Finished updating
   newObj.instances[obj.resolv.resolvedTarget] = newInstance;
   newObj.regionalStats[tag] = newRegion;
-  orchCache[id] = newObj;
+  orchCache[id.toLowerCase()] = newObj;
 
   // Update prometheus stats
   updatePrometheus(tag, id, obj.resolv.resolvedTarget, newObj);
@@ -407,7 +407,7 @@ Main Loop
 
 const updateScore = async function (address) {
   console.log("Checking for new scores for " + address);
-  const lastTime = orchCache[address].leaderboardResults.lastTime;
+  const lastTime = orchCache[address.toLowerCase()].leaderboardResults.lastTime;
 
   let url =
     "https://leaderboard-serverless.vercel.app/api/raw_stats?orchestrator=" +
@@ -422,7 +422,7 @@ const updateScore = async function (address) {
         const newSR = instance.round_trip_time / instance.seg_duration;
         let latitude = null;
         let longitude = null;
-        for (const [resolvedTarget, instance] of orchCache[address].instances) {
+        for (const [resolvedTarget, instance] of orchCache[address.toLowerCase()].instances) {
           if (instance.livepeer_regions[region]) {
             latitude = instance.livepeer_regions[region].latitude;
             longitude = instance.livepeer_regions[region].longitude;
@@ -459,7 +459,7 @@ const updateScore = async function (address) {
     }
   }
   if (hasEdited) {
-    orchCache[address].leaderboardResults.lastTime = new Date().getTime();
+    orchCache[address.toLowerCase()].leaderboardResults.lastTime = new Date().getTime();
   }
 };
 
