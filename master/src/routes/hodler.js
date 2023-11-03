@@ -104,8 +104,7 @@ const getEnsDomain = async function (addr) {
       return cached.domain ? cached.domain : cached.address;
     }
     // Refresh cause not cached or stale
-    const address = ethers.getAddress(addr);
-    const ensDomain = await l1provider.lookupAddress(address);
+    const ensDomain = await l1provider.lookupAddress(addr);
     let ensObj;
     if (!ensDomain) {
       let domain = null;
@@ -211,7 +210,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   // Overwrite name with ENS domain if set
   let ensDomain = null;
   while (!ensDomain) {
-    ensDomain = await getEnsDomain(id);
+    ensDomain = await getEnsDomain(id.toLowerCase());
   }
   // Retrieve entry to update or init it
   let newObj = orchCache[id.toLowerCase()];
