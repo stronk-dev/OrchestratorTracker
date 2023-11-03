@@ -1,2 +1,2 @@
-import masterRouter from './hodler.js';
-export { masterRouter };
+const { masterRouter } = require("./hodler.js");
+exports.masterRouter = masterRouter;

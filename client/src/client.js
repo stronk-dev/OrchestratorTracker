@@ -1,4 +1,4 @@
-import { runTests } from "./util/orchTester.js";
+const { runTests } = require("./util/orchTester.js");
 
 (async () => {
   // On first boot, kickstart the test loop

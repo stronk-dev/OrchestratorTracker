@@ -3,7 +3,7 @@ module.exports = {
       {
          name: "client-orchestrator-prober",
          script: "./src/client.js",
-         cwd: "/orchTest/client",
+         cwd: "/home/marco/repos/OrchestratorAvailability/client",
          env_production: {
             NODE_ENV: "production"
          },

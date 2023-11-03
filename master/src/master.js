@@ -1,8 +1,6 @@
-import express from "express";
-import { masterRouter } from "./routes/index.js";
-import { CONF_MASTER_PORT } from "./config.js";
-// Env variable which determines which DB to connect to
-const { NODE_ENV: mode } = process.env;
+const express = require("express");
+const { masterRouter } = require("./routes/index.js");
+const { CONF_MASTER_PORT } = require("./config.js");
 
 (async () => {
   try {

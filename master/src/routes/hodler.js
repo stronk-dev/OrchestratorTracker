@@ -1,7 +1,7 @@
-import express from "express";
-import client from "prom-client";
-import { JsonRpcProvider } from "ethers";
-import {
+const express = require("express");
+const client = require("prom-client");
+const { JsonRpcProvider } = require("ethers");
+const {
   CONF_API_L1_HTTP,
   CONF_API_L1_KEY,
   CONF_PRESHARED_MASTER_KEY,
@@ -9,7 +9,7 @@ import {
   CONF_KEY_EXPIRY,
   CONF_SCORE_TIMEOUT,
   CONF_SLEEPTIME,
-} from "../config.js";
+} = require("../config.js");
 
 /*
 
@@ -487,4 +487,4 @@ const runTests = async function () {
 console.log("Starting watcher for test stream results");
 runTests();
 
-export default masterRouter;
+exports.masterRouter = masterRouter;

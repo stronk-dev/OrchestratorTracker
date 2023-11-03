@@ -1,12 +1,12 @@
-import dns from "dns";
-import geoip from "geoip-lite";
-import { request, gql } from "graphql-request";
-import https from "https";
-import http from "http";
-import grpc from "@grpc/grpc-js";
-import protoLoader from "@grpc/proto-loader";
+const dns = require("dns");
+const geoip = require("geoip-lite");
+const { request, gql } = require("graphql-request");
+const https = require("https");
+const http = require("http");
+const grpc = require("@grpc/grpc-js");
+const protoLoader = require("@grpc/proto-loader");
 
-import {
+const {
   CONF_MASTER_PORT,
   CONF_MASTER_DOMAIN,
   CONF_MASTER_PATH,
@@ -22,7 +22,7 @@ import {
   CONF_DNS_TIMEOUT,
   CONF_PRESHARED_MASTER_KEY,
   CONF_SIGNATURE,
-} from "../config.js";
+} = require("../config.js");
 
 /*
 
@@ -378,4 +378,4 @@ const runTests = async function () {
   }
 };
 
-export { runTests };
+exports.runTests = runTests;

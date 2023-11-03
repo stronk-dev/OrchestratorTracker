@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "main": "./src/master.js",
-  "type": "module",
+  "type": "commonjs",
   "module": "./src/master.js",
   "scripts": {
     "prod": "NODE_ENV=production pm2 start ecosystem.config.js",

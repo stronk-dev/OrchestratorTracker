@@ -3,7 +3,7 @@ module.exports = {
       {
          name: "master-hodler",
          script: "./src/master.js",
-         cwd: "/orchTest/master",
+         cwd: "/home/marco/repos/OrchestratorAvailability/master",
          env_production: {
             NODE_ENV: "production"
          },
