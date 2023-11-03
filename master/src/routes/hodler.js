@@ -18,7 +18,7 @@ const {
 
 */
 
-const l1provider = new ethers.JsonRpcProvider(
+const l1provider = new ethers.providers.JsonRpcProvider(
   CONF_API_L1_HTTP + CONF_API_L1_KEY
 );
 const masterRouter = express.Router();
