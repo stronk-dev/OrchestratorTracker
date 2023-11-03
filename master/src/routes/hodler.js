@@ -455,6 +455,7 @@ Main Loop
 const updateScore = async function (address) {
   console.log("Checking for new scores for " + address);
   const thisInstances = orchCache[address.toLowerCase()].instances;
+  const thisName = orchCache[address.toLowerCase()].name;
   const lastTime = orchCache[address.toLowerCase()].leaderboardResults.lastTime;
 
   let url =
@@ -489,7 +490,7 @@ const updateScore = async function (address) {
         promLatestRTR.set(
           {
             livepeer_region: instance.region,
-            orchestrator: address,
+            orchestrator: thisName,
             latitude: latitude,
             longitude: longitude,
           },
@@ -498,7 +499,7 @@ const updateScore = async function (address) {
         promLatestSuccessRate.set(
           {
             livepeer_region: instance.region,
-            orchestrator: address,
+            orchestrator: thisName,
             latitude: latitude,
             longitude: longitude,
           },
