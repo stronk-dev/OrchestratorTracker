@@ -209,6 +209,7 @@ async function getIP(hostname) {
 
 const testOrchestrator = async function (id, target) {
   if (!id.length || !target.length) {
+    currentPending--;
     return;
   }
   const origTarget = new URL(target);
@@ -245,6 +246,7 @@ const testOrchestrator = async function (id, target) {
     discoveryResults.err == "insufficient sender reserve"
   ) {
     console.log("Ignoring " + id + " due to insufficient sender reserve");
+    currentPending--;
     return;
   }
   // Cache results
