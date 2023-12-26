@@ -217,12 +217,14 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
   if (!newObj) {
     newObj = {
       name: ensDomain,
+      id: id.toLowerCase(),
       regionalStats: {},
       instances: {},
       leaderboardResults: { lastTime: now },
     };
   } else {
     newObj.name = ensDomain;
+    newObj.id = id.toLowerCase()
   }
   // Find region entry or init it
   let newRegion = newObj.regionalStats[tag];
