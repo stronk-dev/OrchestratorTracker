@@ -180,6 +180,7 @@ const discoverOrchestrator = async function (target) {
       discoveryResults: {
         transcoder: null,
         price_info: null,
+        version: null,
         latency: 0,
         err: "Took too long to respond. Aborted test...",
       },
@@ -189,6 +190,7 @@ const discoverOrchestrator = async function (target) {
     discoveryResults: {
       transcoder: orchestratorInfo.transcoder,
       price_info: orchestratorInfo.price_info,
+      version: orchestratorInfo.version,
       latency: elapsed,
       err: orchestratorInfo.err,
     },

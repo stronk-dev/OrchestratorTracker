@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package net;
+option go_package = "./net";
 
 // RPC calls implemented by the orchestrator
 service Orchestrator {
@@ -9,6 +10,13 @@ service Orchestrator {
   rpc GetOrchestrator(OrchestratorRequest) returns (OrchestratorInfo);
   rpc EndTranscodingSession(EndTranscodingSessionRequest) returns (EndTranscodingSessionResponse);
   rpc Ping(PingPong) returns (PingPong);
+}
+
+service AIWorker {
+
+  // Called by the aiworker to register to an orchestrator. The orchestrator
+  // notifies registered aiworkers of jobs as they come in.
+  rpc RegisterAIWorker(RegisterAIWorkerRequest) returns (stream NotifyAIJob);
 }
 
 service Transcoder {
@@ -42,6 +50,9 @@ message OrchestratorRequest {
 
   // Broadcaster's signature over its address
   bytes sig   = 2;
+
+  // Features and constraints required by the broadcaster
+  Capabilities capabilities = 3;
 }
 
 /*
@@ -104,10 +115,27 @@ message Capabilities {
     // Capacity corresponding to each capability
     map<uint32, uint32> capacities = 3;
 
-    // Non-binary capability constraints, such as supported ranges.
+    string version = 4;
+
+    Constraints constraints = 5;
+
+    // Non-binary constraints.
     message Constraints {
-            // Empty for now
+      string minVersion = 1;
+      map<uint32, CapabilityConstraints> PerCapability = 2;
     }
+
+    // Non-binary capability constraints, such as supported ranges.
+    message CapabilityConstraints {
+      message ModelConstraint {
+        bool warm = 1;
+        uint32 capacity = 2;
+      }
+
+      map<string, ModelConstraint> models = 1;
+    }
+
+
 }
 
 // The orchestrator sends this in response to `GetOrchestrator`, containing
@@ -149,34 +177,6 @@ message AuthToken {
   int64 expiration = 3;
 }
 
-// [EXPERIMENTAL]
-// Describes a class that a model is trained to detect
-message DetectorClass {
-  // ID of the class to detect
-  uint32 class_id = 1;
-
-  // Name of the class to detect
-  string class_name = 2;
-}
-
-// [EXPERIMENTAL]
-// Describes the scene classification configuration
-message SceneClassificationProfile {
-  // Sample rate of the frames picked by the O for scene detection
-  uint32 sample_rate = 1;
-
-  // List of output classes the model is trained to detect
-  repeated DetectorClass classes = 2;
-}
-
-// [EXPERIMENTAL]
-// Describes the content detection configuration
-message DetectorProfile {
-  oneof value {
-    SceneClassificationProfile scene_classification = 1;
-  }
-}
-
 // Data included by the broadcaster when submitting a segment for transcoding.
 message SegData {
 
@@ -205,10 +205,6 @@ message SegData {
   // Data for transcoding authentication
   AuthToken auth_token = 8;
 
-  // [EXPERIMENTAL]
-  // Detector enabled for this segment
-  bool detector_enabled = 9;
-
   // Calculate perceptual hash for this segment
   bool calc_perceptual_hash = 10;
 
@@ -232,10 +228,6 @@ message SegData {
 
   // Force HW Session Reinit
   bool ForceSessionReinit = 38;
-
-  // [EXPERIMENTAL]
-  // Detector profiles to use
-  repeated DetectorProfile detector_profiles = 36;
 }
 
 message SegParameters {
@@ -320,21 +312,6 @@ message TranscodedSegmentData {
     string perceptual_hash_url = 3;
 }
 
-// [EXPERIMENTAL]
-// Describes scene classification results
-message SceneClassificationData {
-  // Probability that the segment is detected as a particular classID (uint32)
-  map<uint32, double> class_probs = 1;
-}
-
-// [EXPERIMENTAL]
-// Describes detection results
-message DetectData {
-  oneof value {
-    SceneClassificationData scene_classification = 1;
-  }
-}
-
 // A set of transcoded segments following the profiles specified in the job.
 message TranscodeData {
 
@@ -343,10 +320,6 @@ message TranscodeData {
 
     // Signature of the hash of the concatenated hashes
     bytes sig = 2;
-
-    // [EXPERIMENTAL]
-    // Detection result data in same order as SegData.detector_profiles
-    repeated DetectData detections = 3;
 }
 
 // Response that a transcoder sends after transcoding a segment.
@@ -361,6 +334,12 @@ message TranscodeResult {
         TranscodeData data = 3;
     }
 
+    // Used to notify a broadcaster of updated orchestrator information
+    OrchestratorInfo info = 16;
+}
+
+// Response that an orchestrator sends after processing a payment.
+message PaymentResult {
     // Used to notify a broadcaster of updated orchestrator information
     OrchestratorInfo info = 16;
 }
@@ -390,6 +369,9 @@ message NotifySegment {
     // ID for this particular transcoding task.
     int64 taskId   = 16;
 
+    // Orchestrator identifier for segment metadata
+    string orchId  = 18;
+
     // All fields below are deprecated. May still be populated if necessary
 
     // Deprecated by segData. Job the segment belongs to.
@@ -401,6 +383,34 @@ message NotifySegment {
 
     // Deprecated by segData. Transcoding configuration to use.
     reserved 33; // Formerly "repeated VideoProfile fullProfiles"
+}
+
+// Sent by the aiworker to register itself to the orchestrator.
+message RegisterAIWorkerRequest {
+
+    // Shared secret for auth
+    string secret = 1;
+
+    // AIWorker capabilities
+    Capabilities capabilities = 2;
+}
+
+// Data included by the gateway when submitting a AI job.
+message AIJobData {
+    // pipeline to use for the job
+    string pipeline = 1;
+
+    // AI job request data
+    bytes requestData = 2;
+}
+
+// Sent by the orchestrator to the aiworker
+message NotifyAIJob {
+    // Configuration for the AI job
+    AIJobData AIJobData = 1;
+
+    // ID for this particular AI task.
+    int64 taskId   = 2;
 }
 
 // Required parameters for probabilistic micropayment tickets

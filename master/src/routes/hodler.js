@@ -296,6 +296,7 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
       price: -1,
       latitude: -1,
       longitude: -1,
+      version: "",
       probedFrom: {},
       regions: {},
       livepeer_regions: {},
@@ -364,6 +365,9 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
     newInstance.price =
       obj.discovery.price_info.pricePerUnit /
       obj.discovery.price_info.pixelsPerUnit;
+  }
+  if (obj.discovery.version) {
+    newInstance.version = obj.discovery.version;
   }
   if (obj.resolv.geoLookup) {
     newInstance.latitude = obj.resolv.geoLookup.latitude;
