@@ -22,6 +22,7 @@ const {
   CONF_DNS_TIMEOUT,
   CONF_PRESHARED_MASTER_KEY,
   CONF_SIGNATURE,
+  CONF_GRAPH_URI,
 } = require("../config.js");
 
 /*
@@ -311,10 +312,7 @@ const getOrchestrators = async function () {
         }
       }
     `;
-    let orchData = await request(
-      "https://api.thegraph.com/subgraphs/name/livepeer/arbitrum-one",
-      orchQuery
-    );
+    let orchData = await request(CONF_GRAPH_URI, orchQuery);
     orchData = orchData.transcoders;
     if (!orchData) {
       console.log("Thegraph is probably acting up...");
