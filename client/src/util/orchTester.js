@@ -191,7 +191,7 @@ const discoverOrchestrator = async function (target) {
     discoveryResults: {
       transcoder: orchestratorInfo.transcoder,
       price_info: orchestratorInfo.price_info,
-      version: orchestratorInfo.version,
+      version: orchestratorInfo?.capabilities?.version,
       latency: elapsed,
       err: orchestratorInfo.err,
     },
