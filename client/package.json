@@ -17,7 +17,7 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.6.8",
     "@grpc/proto-loader": "^0.7.0",
-    "geoip-lite": "^1.4.8",
+    "geoip-lite": "^1.4.10",
     "graphql": "^16.5.0",
     "graphql-request": "^4.3.0"
   },
