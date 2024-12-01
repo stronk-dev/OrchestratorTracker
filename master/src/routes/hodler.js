@@ -87,6 +87,8 @@ function sleep(ms) {
 
 let ensDomainCache = {};
 let orchCache = {};
+let lastStringify = 0; //< We will stringify every 15 seconds so the the JSON endpoint can respond quickly
+let jsonString = "";
 let lastLeaderboardCheck = 0;
 let isSynced = false;
 
@@ -125,11 +127,11 @@ const getEnsDomain = async function (addr) {
     }
     console.log(
       "Updated ENS domain " +
-        ensObj.domain +
-        " owned by " +
-        ensObj.address +
-        " @ " +
-        ensObj.timestamp
+      ensObj.domain +
+      " owned by " +
+      ensObj.address +
+      " @ " +
+      ensObj.timestamp
     );
     ensDomainCache[addr] = ensObj;
     await storage.setItem("ensDomainCache", ensDomainCache);
@@ -312,9 +314,9 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
     ) {
       console.log(
         "Removing expired key " +
-          key +
-          " from the probed-from cache for orch " +
-          id
+        key +
+        " from the probed-from cache for orch " +
+        id
       );
       delete newInstance.probedFrom[key];
     }
@@ -339,9 +341,9 @@ const onOrchUpdate = async function (id, obj, tag, region, livepeer_regions) {
     ) {
       console.log(
         "Removing expired key " +
-          key +
-          " from the livepeer regions cache for orch " +
-          id
+        key +
+        " from the livepeer regions cache for orch " +
+        id
       );
       delete newInstance.livepeer_regions[key];
     }
@@ -446,7 +448,7 @@ masterRouter.get("/prometheus", async (req, res) => {
 masterRouter.get("/json", async (req, res) => {
   try {
     res.set("Content-Type", "application/json");
-    res.end(JSON.stringify(orchCache));
+    res.end(jsonString);
   } catch (err) {
     res.status(400).send(err);
   }
@@ -487,11 +489,11 @@ const updateScore = async function (address) {
         }
         console.log(
           "Found new RTR=" +
-            newRTR +
-            " and new success rate of " +
-            newSR * 100 +
-            "%, livepeer region " +
-            instance.region
+          newRTR +
+          " and new success rate of " +
+          newSR * 100 +
+          "%, livepeer region " +
+          instance.region
         );
         promLatestRTR.set(
           {
@@ -571,13 +573,13 @@ const recoverStorage = async function () {
         }
         console.log(
           "Re-init leaderboard scores for orch=" +
-            id +
-            ", RTR=" +
-            res.latestRTR +
-            " and success rate of " +
-            res.latestSR * 100 +
-            "%, livepeer region " +
-            region
+          id +
+          ", RTR=" +
+          res.latestRTR +
+          " and success rate of " +
+          res.latestSR * 100 +
+          "%, livepeer region " +
+          region
         );
         let latitude = null;
         let longitude = null;
@@ -614,15 +616,39 @@ const recoverStorage = async function () {
 };
 recoverStorage();
 
+// Strip individual measurements from the cache to keep the response tiny
+function shallowCopy() {
+  const mrClean = {};
+  for (const orchestratorId in orchCache) {
+    const orchestrator = orchCache[orchestratorId];
+    // Shallow copy (which references original memory pointers)
+    mrClean[orchestratorId] = { ...orchestrator };
+    // Overwrite regionalStats ref
+    if (orchestrator.regionalStats) {
+      mrClean[orchestratorId].regionalStats = {};
+
+      for (const region in orchestrator.regionalStats) {
+        const regionStats = orchestrator.regionalStats[region];
+
+        // Shallow copy region stats without measurements
+        mrClean[orchestratorId].regionalStats[region] = { ...regionStats };
+        delete mrClean[orchestratorId].regionalStats[region].measurements;
+      }
+    }
+  }
+  return JSON.stringify(mrClean);
+}
+
 const runTests = async function () {
   try {
     const now = new Date().getTime();
-    if (
-      !lastLeaderboardCheck ||
-      now - lastLeaderboardCheck > CONF_SCORE_TIMEOUT
-    ) {
+    if (!lastLeaderboardCheck || now - lastLeaderboardCheck > CONF_SCORE_TIMEOUT) {
       await updateOrchScores();
       lastLeaderboardCheck = now;
+    }
+    if (!lastStringify || now - lastStringify > 15000) {
+      jsonString = shallowCopy();
+      lastStringify = now;
     }
     setTimeout(() => {
       runTests();
