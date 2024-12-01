@@ -122,10 +122,12 @@ async function processQueue() {
       if (staleENSCache) {
         console.log("Writing ENS cache to disk");
         await writeToStorage("ensDomainCache", ensDomainCache);
+        staleENSCache = false;
       }
       if (staleOrchCache) {
         console.log("Writing Orchestrator cache to disk");
         await writeToStorage("orchCache", orchCache);
+        staleOrchCache = false;
       }
       await sleep(1000);
     }
