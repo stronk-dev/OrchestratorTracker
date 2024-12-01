@@ -120,9 +120,11 @@ async function processQueue() {
       }
     } else {
       if (staleENSCache) {
+        console.log("Writing ENS cache to disk");
         await writeToStorage("ensDomainCache", ensDomainCache);
       }
       if (staleOrchCache) {
+        console.log("Writing Orchestrator cache to disk");
         await writeToStorage("orchCache", orchCache);
       }
       await sleep(1000);
@@ -413,7 +415,7 @@ async function onOrchUpdate(id, obj, tag, region, livepeer_regions) {
   staleOrchCache = true;
 
   // Update prometheus stats
-  updatePrometheus(tag, obj.resolv.resolvedTarget, newObj);
+  await updatePrometheus(tag, obj.resolv.resolvedTarget, newObj);
   console.log("Handled results for " + newObj.name + " from prober " + tag);
 }
 
@@ -513,6 +515,7 @@ async function updateScore(address) {
   if (hasEdited) {
     orchCache[address.toLowerCase()].leaderboardResults.lastTime =
       new Date().getTime();
+    staleOrchCache = true;
   }
 }
 
