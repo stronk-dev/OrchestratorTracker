@@ -146,7 +146,7 @@ async function getEnsDomain(addr) {
       // Update domain name
       return ensObj.domain;
     } else {
-      if (cached.domain) {
+      if (cached && cached.domain) {
         // Reuse last cached domain
         return cached.domain;
       } else {
