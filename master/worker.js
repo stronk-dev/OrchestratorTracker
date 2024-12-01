@@ -76,6 +76,8 @@ let lastLeaderboardCheck = 0;
 let lastStringify = 0;
 let isSynced = false;
 let storageLock = false;
+let staleENSCache = false;
+let staleOrchCache = false;
 
 /*
  * Function Skeletons
@@ -100,11 +102,10 @@ async function withStorageLock(fn) {
   }
 }
 
-async function safeWrite(key, data) {
-  const tempKey = `${key}.tmp`;
-  await storage.setItem(tempKey, data); // Write to temp key
-  await storage.removeItem(key); // Remove original key
-  await storage.setItem(key, data); // Rename temp key to original
+async function writeToStorage(key, data) {
+  await withStorageLock(async () => {
+    await storage.setItem(key, data);
+  });
 }
 
 // Process the task queue continuously
@@ -118,6 +119,12 @@ async function processQueue() {
         console.error("Error processing task:", error);
       }
     } else {
+      if (staleENSCache) {
+        await writeToStorage("ensDomainCache", ensDomainCache);
+      }
+      if (staleOrchCache) {
+        await writeToStorage("orchCache", orchCache);
+      }
       await sleep(1000);
     }
   }
@@ -161,9 +168,7 @@ async function getEnsDomain(addr) {
       ensObj.timestamp
     );
     ensDomainCache[addr] = ensObj;
-    await withStorageLock(async () => {
-      await safeWrite("ensDomainCache", ensDomainCache);
-    });
+    staleENSCache = true;
     if (ensObj.domain) {
       // Update domain name
       return ensObj.domain;
@@ -405,9 +410,7 @@ async function onOrchUpdate(id, obj, tag, region, livepeer_regions) {
   newObj.instances[obj.resolv.resolvedTarget] = newInstance;
   newObj.regionalStats[tag] = newRegion;
   orchCache[id.toLowerCase()] = newObj;
-  await withStorageLock(async () => {
-    await safeWrite("orchCache", orchCache);
-  });
+  staleOrchCache = true;
 
   // Update prometheus stats
   updatePrometheus(tag, obj.resolv.resolvedTarget, newObj);
