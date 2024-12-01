@@ -120,14 +120,24 @@ async function processQueue() {
       }
     } else {
       if (staleENSCache) {
-        console.log("Writing ENS cache to disk");
-        await writeToStorage("ensDomainCache", ensDomainCache);
-        staleENSCache = false;
+        try {
+          console.log("Writing ENS cache to disk");
+          await writeToStorage("ensDomainCache", ensDomainCache);
+          staleENSCache = false;
+        } catch (err) {
+          console.log(err);
+          console.log("Error writing to storage...");
+        }
       }
       if (staleOrchCache) {
-        console.log("Writing Orchestrator cache to disk");
-        await writeToStorage("orchCache", orchCache);
-        staleOrchCache = false;
+        try {
+          console.log("Writing Orchestrator cache to disk");
+          await writeToStorage("orchCache", orchCache);
+          staleOrchCache = false;
+        } catch (err) {
+          console.log(err);
+          console.log("Error writing to storage...");
+        }
       }
       await sleep(1000);
     }
