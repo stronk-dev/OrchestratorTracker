@@ -75,6 +75,7 @@ let jsonString = "";
 let lastLeaderboardCheck = 0;
 let lastStringify = 0;
 let isSynced = false;
+let storageLock = false;
 
 /*
  * Function Skeletons
@@ -85,6 +86,25 @@ function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+async function withStorageLock(fn) {
+  while (storageLock) {
+    await sleep(50); // Small delay before retry
+  }
+  storageLock = true;
+  try {
+    await fn();
+  } finally {
+    storageLock = false;
+  }
+}
+
+async function safeWrite(key, data) {
+  const tempKey = `${key}.tmp`;
+  await storage.setItem(tempKey, data); // Write to temp key
+  await storage.removeItem(key); // Remove original key
+  await storage.setItem(key, data); // Rename temp key to original
 }
 
 // Process the task queue continuously
@@ -141,7 +161,9 @@ async function getEnsDomain(addr) {
       ensObj.timestamp
     );
     ensDomainCache[addr] = ensObj;
-    await storage.setItem("ensDomainCache", ensDomainCache);
+    await withStorageLock(async () => {
+      await safeWrite("ensDomainCache", ensDomainCache);
+    });
     if (ensObj.domain) {
       // Update domain name
       return ensObj.domain;
@@ -383,7 +405,9 @@ async function onOrchUpdate(id, obj, tag, region, livepeer_regions) {
   newObj.instances[obj.resolv.resolvedTarget] = newInstance;
   newObj.regionalStats[tag] = newRegion;
   orchCache[id.toLowerCase()] = newObj;
-  await storage.setItem("orchCache", orchCache);
+  await withStorageLock(async () => {
+    await safeWrite("orchCache", orchCache);
+  });
 
   // Update prometheus stats
   updatePrometheus(tag, obj.resolv.resolvedTarget, newObj);
