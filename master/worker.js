@@ -103,9 +103,15 @@ async function withStorageLock(fn) {
 }
 
 async function writeToStorage(key, data) {
-  await withStorageLock(async () => {
-    await storage.setItem(key, data);
-  });
+  try {
+    const serialized = JSON.stringify(data);
+    if (!serialized) throw new Error("Serialization failed");
+    await withStorageLock(async () => {
+      await storage.setItem(key, JSON.parse(serialized));
+    });
+  } catch (err) {
+    console.error("Error writing to storage:", err.message);
+  }
 }
 
 // Process the task queue continuously
